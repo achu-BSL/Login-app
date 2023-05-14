@@ -24,19 +24,14 @@ app.get("/", (req, res)=>{
 
 
 /** start server only when we have valid connection */
-// connect().then(()=>{
-//     try{
-//         app.listen(port, ()=>{
-//             console.log("server is running on port 3000")
-//         })
-//     }catch(err){
-//         console.log("Cannot connect the server")
-//     }
-// }).catch(err=>{
-//     console.log("Invalid Database connection....!")
-// })
-
-
-app.listen(port, ()=>{
-    console.log("server is running on port 8080")
+ connect().then(()=>{
+     try{
+         app.listen(port, ()=>{
+             console.log("server is running on port 3000")
+        })
+    }catch(err){
+        console.log("Cannot connect the server")
+    }
+}).catch(err=>{
+    console.log("Invalid Database connection....!")
 })
