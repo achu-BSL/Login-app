@@ -1,6 +1,6 @@
-import mongoose from "mongoose"
+import mongoose, { Schema } from "mongoose"
 
-export const userShema = new mongoose.Schema({
+export const userShema = new Schema({
     username: {
         type: String,
         required: [true, "Please provide unique username..!"],
@@ -11,7 +11,7 @@ export const userShema = new mongoose.Schema({
         required: [true, "Please provide unique password...!"],
         unique: false
     },
-    email: {
+    email: { 
         type: String,
         required: [true, 'Pleas provide email...!'],
         unique: [true, "Email already taken"]
