@@ -57,7 +57,6 @@ export async function registerUser(credentials){
         }
         return Promise.resolve({msg})
     } catch (err){
-        console.log("problem inside helper")
         return Promise.reject({err})
     }
 }    
@@ -67,13 +66,10 @@ export async function registerUser(credentials){
 export async function verifyPassword(username, password){
     try{
         if(username){
-            console.log("verifyPassword", username, password)
             const {data} = await axios.post('http://localhost:8080/api/login', {username, password})
-            console.log("Data from axios", data)
             return Promise.resolve({data})
         }
     } catch (err){
-        console.log("inside err")
         return Promise.reject({err})
     }
 }
@@ -92,6 +88,7 @@ export async function updateUser(response){
                 }
             }
             )
+            console.log(data)
         Promise.resolve(data)
     }catch(err){
         Promise.reject({err})

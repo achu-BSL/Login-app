@@ -9,9 +9,7 @@ import mongoose, { ObjectId } from "mongoose"
 export async function verifyUser(req, res, next){
   try{
     const {username} = req.method == 'GET' ? req.query : req.body
-    console.log(req.body)
     //check the user existance
-    console.log("%c prev", "color: blue; font-size: 24px;")
     const exist = await UserModel.findOne({username})
     if(!exist) return res.status(404).send({err: 'User Not Found..:('})
     next()
@@ -218,19 +216,22 @@ export async function getUser(req, res){
 
     const user = await UserModel.findOne({username})
     // if(!user) return res.status(400).send("Cannot find the user..")
-
+    console.log(user)
 
     //remove password from user
     //mongoose return unecessary data with object so convert it into json
     const {password, ...rest} = Object.assign({}, user.toJSON())//this is shallow copy
-    res.status(200).send(rest)
+    console.log(password, "Password")
+    console.log(rest, "rest")
+    return res.status(200).send(rest)
 
-   .catch(err => {
-    return res.status(500).send(err.message)
-   })
+  //  .catch(err => {
+  //   return res.status(500).send(err.message)
+  //  })
 
 
   } catch (err) {
+    console.log(err.message)
     res.status(500).send("Couldn't find the user data!")
   }
 }
@@ -275,28 +276,27 @@ export async function getUser(req, res){
 export async function updateUser(req, res){
 
   // const {id} = req.query
-  const {userId} = req.user
-
-  if(!userId) return res.status(400).send('Ivalid userid')
-
-  const body = req.body
-
-  await UserModel.findByIdAndUpdate(
-    userId,
-    body,
-    {new: true}
-  )
-  .then(()=>{
-    res.status(200).send("User updateded success")
-  })
-  .catch(err =>{
+  try {
+    const {userId} = req.user
+  
+    if(!userId) return res.status(400).send('Ivalid userid')
+  
+    const body = req.body
+  
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      body,
+      {new: true}
+    )
+    return res.status(200).send(user)
+  } catch (err) {
     res.status(500).send("Couldn't fetch user data..")
-  })
+  }
 }
 
 
-export  async function generateOTP(req, res){
-    req.app.locals.OTP = await otpGenerator.generate(6, {
+export function generateOTP(req, res){
+    req.app.locals.OTP = otpGenerator.generate(6, {
       lowerCaseAlphabets: false, 
       upperCaseAlphabets: false, 
       specialChars: false   

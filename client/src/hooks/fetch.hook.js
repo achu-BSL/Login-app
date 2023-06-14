@@ -22,7 +22,6 @@ export default function useFetch(query){
                 if(status === 200){
                     setData(prev => ({...prev, isLoading: false}))
                     setData(prev => ({...prev, apiData: data, status: status}))
-                    console.log(data.username)
                 }
 
                 // setData(prev => ({...prev, isLoading: false}))

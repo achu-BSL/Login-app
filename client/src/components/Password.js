@@ -10,14 +10,13 @@ import { useAuthStore } from '../store/store.js'
 import { verifyPassword } from '../helper/helper'
 
 
-export default async function Password(){
+export default function Password(){
 
     const navigate = useNavigate()
     const {username} = useAuthStore(state => state.auth)
     const [{isLoading, apiData, serverError}] = useFetch(`user/${username}`)
 
 
-    console.log(apiData)
     const formik = useFormik({
         initialValues: {
             password: 'admin@123'
@@ -26,7 +25,6 @@ export default async function Password(){
         validateOnBlur: false,
         validateOnChange: false,
         onSubmit: async values => {
-            console.log("before fetch")
             const loginPromise = verifyPassword(username, values.password)
             toast.promise(loginPromise, {
                 loading: 'Checking...',
@@ -37,7 +35,6 @@ export default async function Password(){
             loginPromise.then(res=>{
                 const { token } = res.data;
                 localStorage.setItem('token', token)
-                console.log("hihihihih")
                 navigate("/profile")
             })
         }

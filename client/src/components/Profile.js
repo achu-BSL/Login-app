@@ -7,6 +7,7 @@ import { profileValidation } from '../helper/validate'
 import convertToBase64 from '../helper/convert'
 import useFetch from '../hooks/fetch.hook.js'
 import { useAuthStore } from '../store/store'
+import { updateUser } from '../helper/helper.js'
 
 
 import styles from "../styles/Username.module.css"
@@ -18,7 +19,7 @@ export default function Profile(){
     const {username} = useAuthStore(state => state.auth)
     const [{isLoading, apiData, serverError}] = useFetch(`user/${username}`)
 
-
+    console.log(apiData.firstName)
     const formik = useFormik({
         initialValues: {
             firstName: apiData?.firstName || "",
@@ -31,7 +32,9 @@ export default function Profile(){
         validateOnBlur: false,
         validateOnChange: false,
         onSubmit: async values => {
-            values = await Object.assign(values, {profile: file || ''})
+            values = Object.assign(values, {profile: file || ''})
+            const updatePromise = await updateUser(values)
+            console.log(updatePromise)
             console.log(values)
         }
     })
