@@ -1,5 +1,5 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import avatar from '../assets/profile.png'
 import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
@@ -10,12 +10,14 @@ import { useAuthStore } from '../store/store.js'
 import { verifyPassword } from '../helper/helper'
 
 
-export default function Password(){
+export default async function Password(){
 
+    const navigate = useNavigate()
     const {username} = useAuthStore(state => state.auth)
-    console.log(username)
     const [{isLoading, apiData, serverError}] = useFetch(`user/${username}`)
 
+
+    console.log(apiData)
     const formik = useFormik({
         initialValues: {
             password: 'admin@123'
@@ -24,13 +26,20 @@ export default function Password(){
         validateOnBlur: false,
         validateOnChange: false,
         onSubmit: async values => {
-            const loginPromise = verifyPass word({username, password: values.password})
+            console.log("before fetch")
+            const loginPromise = verifyPassword(username, values.password)
             toast.promise(loginPromise, {
                 loading: 'Checking...',
                 success: <b>Login Successfully...</b>,
                 error: <b>Password Not match</b>
             })
-
+            
+            loginPromise.then(res=>{
+                const { token } = res.data;
+                localStorage.setItem('token', token)
+                console.log("hihihihih")
+                navigate("/profile")
+            })
         }
     })
 

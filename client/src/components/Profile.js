@@ -5,6 +5,9 @@ import { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
 import { profileValidation } from '../helper/validate'
 import convertToBase64 from '../helper/convert'
+import useFetch from '../hooks/fetch.hook.js'
+import { useAuthStore } from '../store/store'
+
 
 import styles from "../styles/Username.module.css"
 import extend from "../styles/Profile.module.css"
@@ -12,14 +15,17 @@ import extend from "../styles/Profile.module.css"
 export default function Profile(){
 
     const [file, setFile] = useState()
+    const {username} = useAuthStore(state => state.auth)
+    const [{isLoading, apiData, serverError}] = useFetch(`user/${username}`)
+
 
     const formik = useFormik({
         initialValues: {
-            firstName: "admin",
-            lastName: "adm",
-            email: 'Exapmle@gmail.com',
-            mobile: 53234434,
-            address: "kerala"
+            firstName: apiData?.firstName || "",
+            lastName: apiData?.lastName || "",
+            email: apiData?.email || '',
+            mobile: apiData?.mobile || '',
+            address: apiData?.address || ""
         },
         validate: profileValidation,
         validateOnBlur: false,
@@ -35,6 +41,10 @@ export default function Profile(){
         const base64 = await convertToBase64(e.target.files[0])
         setFile(base64)
     }
+
+
+    if(isLoading) return <h1 className='text-2xl font-bold'>is Loading</h1>
+    if(serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>
 
     return (
         <div className='container mx-auto'>
@@ -54,10 +64,10 @@ export default function Profile(){
                     <form className='py-1' onSubmit={formik.handleSubmit}>
                         <div className='profile flex justify-center py-4'>
                             <label htmlFor='profile'>
-                                <img src={file || avatar} className={`${styles.profile_img} ${extend.profile_img}`} alt='avatar'/>
+                                <img src={apiData?.profile || file || avatar} className={`${styles.profile_img} ${extend.profile_img}`} alt='avatar'/>
                             </label>
                             <input onChange={onUpload} type='file' id='profile' name="profile"/>
-                        </div>
+                         </div>
 
                         <div className='textbox flex flex-col items-center gap-6'>
                             <div className='name flex w-3/4 gap-10'>

@@ -9,10 +9,10 @@ import mongoose, { ObjectId } from "mongoose"
 export async function verifyUser(req, res, next){
   try{
     const {username} = req.method == 'GET' ? req.query : req.body
-
     console.log(req.body)
     //check the user existance
-    let exist = await UserModel.findOne({username})
+    console.log("%c prev", "color: blue; font-size: 24px;")
+    const exist = await UserModel.findOne({username})
     if(!exist) return res.status(404).send({err: 'User Not Found..:('})
     next()
   }catch(err){
@@ -157,25 +157,28 @@ export async function register(req, res){
 // }
 export async function login(req, res){
   const {username, password} = req.body
-  
+  console.log(username, password)
   try {
-    console.log(username, password)
     const user = await UserModel.findOne({username})
   
     await bcrypt.compare(password, user.password)
       .then(passwordCheck=>{
         if(!passwordCheck) return res.status(400).send("Password Incorrect...:(")
+    
+    // console.log("before return 200")
+    // const passwordCheck = await bcrypt.compare(password, user.password)
+    // if(!passwordCheck) return res.status(400).send("Password Incorrect...")
+
+    const token = jwt.sign({
+      userId: user._id,
+      userName: user.username
+    }, ENV.JWT_SECRET, {expiresIn: '24h'})
   
-        const token = jwt.sign({
-          userId: user._id,
-          userName: user.username
-        }, ENV.JWT_SECRET, {expiresIn: '24h'})
-  
-        console.log(token)
-        return res.status(200).send({
-          token,
-          msg: "Login successfully."
-        })
+    console.log("before return 200")
+    return res.status(200).send({
+      token,
+      msg: "Login successfully."
+    })
       })
       .catch(err => res.status(400).send("OOPS something wrong..."))
   } catch (err) {
@@ -214,18 +217,18 @@ export async function getUser(req, res){
     if(!username) return res.status(400).send("Invalid username...:(")
 
     const user = await UserModel.findOne({username})
-     .then(user =>{
-      if(!user) return res.status(400).send("Cannot find the user..")
+    // if(!user) return res.status(400).send("Cannot find the user..")
 
 
-      //remove password from user
-      //mongoose return unecessary data with object so convert it into json
-      const {password, ...rest} = Object.assign({}, user.toJSON())//this is shallow copy
-      res.status(200).json({rest})
-     })
-     .catch(err => {
-      return res.status(500).send(err.message)
-     })
+    //remove password from user
+    //mongoose return unecessary data with object so convert it into json
+    const {password, ...rest} = Object.assign({}, user.toJSON())//this is shallow copy
+    res.status(200).send(rest)
+
+   .catch(err => {
+    return res.status(500).send(err.message)
+   })
+
 
   } catch (err) {
     res.status(500).send("Couldn't find the user data!")
@@ -274,7 +277,7 @@ export async function updateUser(req, res){
   // const {id} = req.query
   const {userId} = req.user
 
-  if(!userId)return res.status(400).send('Ivalid userid')
+  if(!userId) return res.status(400).send('Ivalid userid')
 
   const body = req.body
 

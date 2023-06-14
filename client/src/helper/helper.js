@@ -67,22 +67,25 @@ export async function registerUser(credentials){
 export async function verifyPassword(username, password){
     try{
         if(username){
+            console.log("verifyPassword", username, password)
             const {data} = await axios.post('http://localhost:8080/api/login', {username, password})
+            console.log("Data from axios", data)
             return Promise.resolve({data})
         }
     } catch (err){
+        console.log("inside err")
         return Promise.reject({err})
     }
 }
 
 
 /**update userProfile function */
-export async function updateUser(responce){
+export async function updateUser(response){
     try{
-        const token = await localStorage.getItem('token')
+        const token = localStorage.getItem('token')
         const data = await axios.put(
-            '/api/updateuser', 
-            responce,
+            'http://localhost:8080/api/updateuser', 
+            response,
             {
                 headers: {
                     'Authorization' : `Bearer ${token}`
