@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
-import {Link} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import avatar from '../assets/profile.png'
-import { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
 import { profileValidation } from '../helper/validate'
 import convertToBase64 from '../helper/convert'
@@ -15,12 +15,12 @@ import extend from "../styles/Profile.module.css"
 
 export default function Profile(){
 
+    const navigate = useNavigate()
     const [file, setFile] = useState()
-    const {username} = useAuthStore(state => state.auth)
-    const [{isLoading, apiData, serverError}] = useFetch(`user/${username}`)
+    const [{isLoading, apiData, serverError}] = useFetch()
 
-    console.log(apiData.firstName)
     const formik = useFormik({
+        enableReinitialize: true,
         initialValues: {
             firstName: apiData?.firstName || "",
             lastName: apiData?.lastName || "",
@@ -32,10 +32,13 @@ export default function Profile(){
         validateOnBlur: false,
         validateOnChange: false,
         onSubmit: async values => {
-            values = Object.assign(values, {profile: file || ''})
-            const updatePromise = await updateUser(values)
-            console.log(updatePromise)
-            console.log(values)
+            values = Object.assign(values, {profile: file || apiData?.profile || ''})
+            const updatePromise = updateUser(values)
+            toast.promise(updatePromise, {
+                loading: 'Updating...',
+                success: <b>Updated success</b>,
+                error: <b>Oops something wrong</b>
+            })
         }
     })
 
@@ -45,6 +48,12 @@ export default function Profile(){
         setFile(base64)
     }
 
+
+    //logout handler function 
+    function logout(){
+        localStorage.removeItem('token')
+        navigate('/login')
+    }
 
     if(isLoading) return <h1 className='text-2xl font-bold'>is Loading</h1>
     if(serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>
@@ -89,7 +98,7 @@ export default function Profile(){
                         </div>
 
                         <div className='text-center py-4'>
-                            <span className='text-gray-500'>Come back later? <Link className='text-red-500' to='/'>Logout</Link></span>
+                            <span className='text-gray-500'>Come back later? <button  className='text-red-500'>Logout</button></span>
                         </div>
                     </form>
                 </div>

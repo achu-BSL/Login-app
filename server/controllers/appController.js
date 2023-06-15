@@ -216,7 +216,6 @@ export async function getUser(req, res){
 
     const user = await UserModel.findOne({username})
     // if(!user) return res.status(400).send("Cannot find the user..")
-    console.log(user)
 
     //remove password from user
     //mongoose return unecessary data with object so convert it into json
